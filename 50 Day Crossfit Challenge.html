@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50-Day Dumbbell Crossfit Challenge</title>
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 0.5em;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1em;
+            color: #e74c3c; /* Crossfit-ish red */
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+             height: 25px; /* Explicit height */
+        }
+
+        .progress-bar {
+            width: 0%; /* Initial width */
+            height: 100%;
+            background-color: #2ecc71; /* Green */
+            text-align: center;
+            line-height: 25px; /* Match container height */
+            color: white;
+            font-weight: bold;
+            transition: width 0.4s ease;
+            white-space: nowrap;
+             overflow: hidden; /* Hide text overflow */
+        }
+
+        /* Workout Display */
+        .workout-day {
+            border: 1px solid #eee;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+
+        .workout-day h2 {
+            margin-top: 0;
+            color: #3498db; /* Blue */
+        }
+
+        .workout-section {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 3px solid #3498db;
+        }
+
+        .workout-section h3 {
+            margin-bottom: 5px;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        ul {
+            list-style: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        strong {
+            color: #e74c3c;
+        }
+
+        /* Navigation & Controls */
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-button, .action-button, .timer-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-button:hover, .action-button:hover, .timer-button:hover {
+            background-color: #2980b9;
+        }
+
+        .nav-button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .completion-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .completion-status input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .completion-status label {
+             font-weight: bold;
+             cursor: pointer;
+        }
+
+        /* Timer Styles */
+        .timer {
+            text-align: center;
+            font-size: 2em;
+            margin: 20px 0;
+            color: #2c3e50;
+            background-color: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .timer-controls button {
+            margin: 0 5px;
+        }
+
+        /* Notes & Disclaimer */
+        .notes, .disclaimer {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 20px;
+            border-left: 3px solid #f39c12; /* Orange */
+            padding-left: 10px;
+        }
+
+        .disclaimer {
+             border-left-color: #c0392b; /* Red */
+             font-weight: bold;
+        }
+
+        /* Responsive Adjustments */
+         @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+             .navigation {
+                flex-direction: column;
+                gap: 10px;
+             }
+             .nav-button, .action-button {
+                width: 100%;
+             }
+             .timer {
+                font-size: 1.5em;
+             }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>50-Day Dumbbell Crossfit Challenge</h1>
+        <p>From Beginner to Advanced using only Adjustable Dumbbells (10-90lbs).</p>
+        <p class="disclaimer">
+            <strong>Disclaimer:</strong> Consult your doctor before starting any new workout program. Prioritize proper form over weight or speed. Listen to your body and rest when needed. Modify exercises if necessary. Scale weights appropriately for your fitness level. Consider adding 1-2 rest days per week even though 50 consecutive days are listed.
+        </p>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">0% Complete</div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button id="prevDay" class="nav-button">Previous Day</button>
+            <span id="dayIndicator" style="font-weight: bold;">Day 1 / 50</span>
+            <button id="nextDay" class="nav-button">Next Day</button>
+        </div>
+
+        <!-- Workout Display Area -->
+        <div id="workoutDisplay" class="workout-day">
+            <!-- Workout content will be loaded here by JavaScript -->
+            Loading workout...
+        </div>
+
+        <!-- Completion Checkbox -->
+        <div class="completion-status">
+             <input type="checkbox" id="completeCheckbox">
+             <label for="completeCheckbox">Mark Day as Complete</label>
+        </div>
+
+         <!-- Simple Timer -->
+         <div class="timer-section">
+             <h3>Workout Timer</h3>
+             <div id="timerDisplay" class="timer">00:00</div>
+             <div class="timer-controls" style="text-align: center;">
+                 <button id="startTimer" class="timer-button">Start</button>
+                 <button id="stopTimer" class="timer-button">Stop</button>
+                 <button id="resetTimer" class="timer-button">Reset</button>
+             </div>
+         </div>
+
+        <div class="notes">
+            <strong>General Notes:</strong>
+            <ul>
+                <li>"DB" = Dumbbell.</li>
+                <li>Adjust weights based on your strength for the target rep range. The last few reps should be challenging but doable with good form.</li>
+                <li>"AMRAP" = As Many Rounds/Reps As Possible in the given time.</li>
+                <li>"RFT" = Rounds For Time. Complete the work as fast as possible with good form.</li>
+                <li>"EMOM" = Every Minute On the Minute. Start the prescribed work at the beginning of each minute. Rest for the remainder of the minute.</li>
+                <li>"For Quality" = Focus on controlled movement and perfect form, not speed.</li>
+                 <li>**Rest:** While 50 workout days are provided, integrating 1-2 rest days per week is crucial for recovery and long-term progress. Listen to your body!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // --- WORKOUT DATA ---
+        // Structure: { day: number, title: string, focus: string, warmup: string[], workout: { type: string, details: string[] }, cooldown: string[], notes?: string }
+        const workouts = [
+            // Phase 1: Foundation & Form (Days 1-10) - Focus on technique, moderate reps/rounds
+            {
+                day: 1, title: "Foundation Squats & Push", focus: "Form & Control",
+                warmup: ["5 min Light Cardio (Jog in place, Jumping Jacks)", "10 Leg Swings (each leg, forward/back & side/side)", "10 Arm Circles (forward/backward)", "10 Cat-Cow Stretches"],
+                workout: { type: "3 Rounds For Quality", details: ["10 DB Goblet Squats (light-moderate)", "10 DB Floor Press (moderate)", "10 DB Bent Over Rows (moderate, each arm)", "30 sec Plank Hold"] },
+                cooldown: ["5 min Easy Walk", "30s Quad Stretch (each side)", "30s Chest Stretch (doorway or floor)", "30s Child's Pose"]
+            },
+            {
+                day: 2, title: "Hinge & Pull Basics", focus: "Posterior Chain",
+                warmup: ["5 min Incline Walk (if possible) or Marching in place", "10 Glute Bridges", "10 Good Mornings (bodyweight or light DB)", "10 Scapular Push-ups"],
+                workout: { type: "3 Rounds For Quality", details: ["10 DB Romanian Deadlifts (RDLs) (light-moderate)", "10 Single Arm DB Rows (moderate, each arm)", "10 DB Goblet Squats (light)", "10 Push-ups (knees or toes)"] },
+                cooldown: ["5 min Gentle Stretching", "30s Hamstring Stretch (each side)", "30s Lat Stretch (each side)", "30s Cobra Stretch"]
+            },
+             {
+                day: 3, title: "Intro to AMRAP", focus: "Conditioning & Full Body",
+                warmup: ["5 min Dynamic Stretching (High Knees, Butt Kicks)", "10 Torso Twists", "10 Walking Lunges (total)", "5 Inchworms"],
+                workout: { type: "AMRAP 8 Minutes", details: ["6 DB Thrusters (light)", "8 DB Bent Over Rows (light)", "10 Air Squats"] },
+                cooldown: ["5 min Walk", "30s Triceps Stretch (each side)", "30s Pigeon Pose (each side)", "30s Forward Fold"]
+            },
+            {
+                day: 4, title: "Upper Body Press & Core", focus: "Strength & Stability",
+                warmup: ["5 min Arm Circles & Shoulder Rolls", "10 Band Pull-Aparts (or DB equivalent - flyes with light weight)", "10 Plank Shoulder Taps", "10 Bird Dog (each side)"],
+                workout: { type: "4 Rounds For Quality", details: ["8 DB Strict Press (standing or seated, moderate)", "12 DB Renegade Rows (6 each side, light-moderate, maintain stable plank)", "15 Sit-ups (or Crunches)", "Rest 60s between rounds"] },
+                cooldown: ["5 min Stretching", "30s Shoulder Stretch (across body, each arm)", "30s Biceps Stretch", "30s Lower Back Twist (each side)"]
+            },
+            {
+                day: 5, title: "Lower Body Focus", focus: "Leg Strength & Endurance",
+                warmup: ["5 min Jogging or Cycling", "15 Bodyweight Squats", "10 Forward Lunges (each leg)", "10 Lateral Lunges (each leg)"],
+                workout: { type: "Every 2 Minutes for 10 Minutes (5 Sets)", details: ["8 DB Front Squats (moderate)", "8 DB Reverse Lunges (4 each leg, moderate)"] },
+                cooldown: ["5 min Walk", "30s Calf Stretch (each leg)", "30s Groin Stretch (Butterfly)", "30s Figure Four Stretch (each side)"]
+            },
+            {
+                day: 6, title: "Active Recovery / Light Skill", focus: "Movement Quality",
+                warmup: ["5 min Gentle Cardio", "Full Body Dynamic Mobility Routine"],
+                workout: { type: "For Quality - 2-3 Rounds", details: ["10 Single Leg DB RDLs (light, focus on balance, 5 each leg)", "10 Tempo Goblet Squats (3 sec down, 1 sec pause, 1 sec up)", "1 min Plank Hold", "10 Turkish Get-up Sit-ups (light, 5 each side - just the sit-up part)"] },
+                cooldown: ["10 min Full Body Static Stretching"]
+            },
+            {
+                day: 7, title: "Conditioning Challenge", focus: "Work Capacity",
+                warmup: ["5 min Burpee Warmup (slow pace)", "10 Jumping Squats", "10 Scap Pull-ups (simulate on floor)", "10 Mountain Climbers (slow)"],
+                workout: { type: "AMRAP 10 Minutes", details: ["5 Burpees", "10 DB Goblet Squats (moderate)", "15 Sit-ups"] },
+                cooldown: ["5 min Cool Down Walk", "30s Chest Opener", "30s Lying Knee to Chest (each leg)", "30s Happy Baby Pose"]
+            },
+             {
+                day: 8, title: "Push/Pull Strength", focus: "Upper Body Hypertrophy",
+                warmup: ["5 min Rowing (if possible) or Jumping Jacks", "10 Push-ups", "10 Ring Rows (or DB Rows)", "10 YTWL raises (bodyweight or very light DBs)"],
+                workout: { type: "4 Rounds", details: ["8 DB Bench Press (or Floor Press) (moderate-heavy)", "10 DB Bent Over Rows (moderate-heavy)", "12 DB Bicep Curls (moderate)", "12 DB Overhead Triceps Extensions (moderate)", "Rest 90s between rounds"] },
+                cooldown: ["5 min Stretching", "30s Biceps Stretch", "30s Triceps Stretch", "30s Pec Stretch"]
+            },
+            {
+                day: 9, title: "Lunges & Core", focus: "Unilateral Strength & Core Stability",
+                warmup: ["5 min Stair Climbing or Step-ups", "10 Walking Lunges (each leg)", "10 Side Planks (30s each side)", "10 Dead Bugs (each side)"],
+                workout: { type: "3 Rounds For Time", details: ["20 DB Walking Lunges (10 each leg, moderate)", "15 V-Ups (or Tuck Crunches)", "10 Renegade Rows (5 each side, maintain plank!)"] },
+                cooldown: ["5 min Walk", "30s Hip Flexor Stretch (each side)", "30s Quad Stretch (each side)", "30s Oblique Stretch (each side)"]
+            },
+            {
+                day: 10, title: "Full Body Finisher", focus: "Endurance & Grit",
+                warmup: ["5 min Moderate Cardio", "10 Inchworms + Push-up", "10 Squat Jumps", "10 Russian Twists (bodyweight)"],
+                workout: { type: "AMRAP 12 Minutes", details: ["8 DB Hang Clean & Press (light-moderate)", "10 DB Front Rack Reverse Lunges (5 each leg)", "12 Burpees over Dumbbell (optional hop)"] },
+                cooldown: ["5-10 min Gentle Walk & Stretch", "Focus on deep breathing", "Hold stretches for 30-60s"]
+            },
+            // Phase 2: Building Intensity (Days 11-25) - Increase volume, introduce EMOMs, slightly heavier weights
+             {
+                day: 11, title: "Strength EMOM", focus: "Power & Strength",
+                warmup: ["5 min Jump Rope or similar", "10 Goblet Squats", "5 Broad Jumps", "10 Scap Push-ups + 5 Regular Push-ups"],
+                workout: { type: "EMOM 10 Minutes", details: ["Minute 1: 5 DB Push Press (moderate-heavy)", "Minute 2: 8 DB Goblet Squats (moderate-heavy)"] },
+                cooldown: ["5 min Walk", "30s Shoulder Stretch", "30s Quad Stretch", "30s Child's Pose"]
+            },
+            {
+                day: 12, title: "Posterior Chain Power", focus: "Deadlifts & Rows",
+                warmup: ["5 min Dynamic Warm-up", "15 Glute Bridges", "10 Good Mornings", "10 Single Arm DB Swings (each arm, light)"],
+                workout: { type: "5 Rounds For Quality", details: ["8 DB Deadlifts (moderate-heavy, focus on form!)", "10 Single Arm DB Rows (heavy, each arm)", "12 DB Russian Twists (moderate weight)", "Rest 60-90s between rounds"] },
+                cooldown: ["5 min Stretching", "30s Hamstring Stretch", "30s Lat Stretch", "30s Lower Back Release"]
+            },
+            {
+                day: 13, title: "Chipper Challenge", focus: "Endurance & Pacing",
+                warmup: ["5 min Cardio Choice", "10 Air Squats", "10 Lunges", "10 Push-ups", "10 Sit-ups"],
+                workout: { type: "For Time", details: ["50 Air Squats", "40 DB Renegade Rows (20 each side, light-moderate)", "30 Push-ups", "20 DB Goblet Squats (moderate)", "10 Burpees"] },
+                cooldown: ["5 min Walk", "Full body stretch routine (focus on worked muscles)"]
+            },
+             {
+                day: 14, title: "Overhead Stability", focus: "Shoulder Strength & Core",
+                warmup: ["5 min Arm/Shoulder Mobility", "10 YTWLs", "10 Plank Ups", "30s Side Plank (each)"],
+                workout: { type: "AMRAP 10 Minutes", details: ["8 Single Arm DB Strict Press (4 each arm, moderate)", "10 DB Front Raises (light-moderate)", "12 Plank Jacks"] },
+                cooldown: ["5 min Stretching", "30s Overhead Triceps Stretch", "30s Chest/Shoulder Stretch", "30s Cat-Cow"]
+            },
+             {
+                day: 15, title: "Leg Burner", focus: "Lower Body Volume",
+                warmup: ["5 min Cycling or Jogging", "15 Squats", "10 Lunges (each leg)", "10 Calf Raises"],
+                workout: { type: "4 Rounds For Time", details: ["10 DB Front Squats (moderate)", "12 DB Romanian Deadlifts (moderate)", "14 DB Alternating Reverse Lunges (7 each leg)", "16 Jump Squats"] },
+                cooldown: ["5 min Walk", "30s Quad Stretch", "30s Hamstring Stretch", "30s Glute Stretch (Pigeon or Figure Four)"]
+            },
+             { // Day 16 - Introduce Devil Press
+                day: 16, title: "Devil's Introduction", focus: "Full Body Power & Conditioning",
+                warmup: ["5 min Dynamic Warm-up", "10 Inchworms", "10 Burpees (slow)", "10 DB Deadlifts (light)"],
+                workout: { type: "AMRAP 12 Minutes", details: ["4 Devil Presses (light-moderate, focus on form!)", "8 DB Goblet Lunges (4 each leg)", "12 Sit-ups"] },
+                cooldown: ["5 min Walk/Stretch", "30s Shoulder Stretch", "30s Hip Flexor Stretch", "30s Child's Pose"]
+            },
+             { // Day 17 - Strength Focus + Accessory
+                day: 17, title: "Pressing Strength & Arms", focus: "Upper Body Strength",
+                warmup: ["5 min Cardio", "Shoulder Mobility", "10 Push-ups", "10 DB Rows"],
+                workout: { type: "Strength + Accessory", details: [
+                    "Part A: DB Bench Press (or Floor Press) - 5 sets of 5 reps (heavy, rest 2 mins)",
+                    "Part B: 3 Rounds - 10 DB Skullcrushers (moderate), 10 DB Hammer Curls (moderate), Rest 60s"
+                ]},
+                cooldown: ["5 min Stretching", "30s Chest Stretch", "30s Triceps Stretch", "30s Biceps Stretch"]
+            },
+            { // Day 18 - Longer AMRAP
+                day: 18, title: "Endurance Builder", focus: "Sustained Effort",
+                warmup: ["5-7 min Moderate Cardio", "15 Air Squats", "10 Push-ups", "10 Lunges"],
+                workout: { type: "AMRAP 15 Minutes", details: ["10 DB Deadlifts (moderate)", "10 Burpees", "10 V-Ups"] },
+                cooldown: ["5 min Cool Down Walk", "30s Hamstring Stretch", "30s Chest Stretch", "30s Lower Back Twist"]
+            },
+            { // Day 19 - Unilateral Focus
+                day: 19, title: "Single Side Strength", focus: "Balance & Stability",
+                warmup: ["5 min Mobility", "10 Single Leg Glute Bridges (each)", "10 Bird Dog (each)", "10 Lateral Lunges (each)"],
+                workout: { type: "4 Rounds (2 each side leading)", details: [
+                    "8 Single Arm DB Floor Press (moderate-heavy)",
+                    "10 Single Arm DB Rows (moderate-heavy)",
+                    "12 Single Leg DB RDLs (light-moderate, focus on balance - 6 per leg)"
+                ], notes: "Alternate which arm starts the press/row each round. Complete all reps on one side before switching for RDLs."},
+                cooldown: ["5 min Stretching", "30s Figure Four Stretch", "30s Oblique Stretch", "30s Lat Stretch"]
+            },
+            { // Day 20 - Skill: DB Snatch Intro
+                day: 20, title: "Intro to DB Snatch", focus: "Power & Coordination",
+                warmup: ["5 min Dynamic Warm-up", "10 High Pulls (light DB)", "10 Overhead Squats (PVC or broomstick if possible, otherwise light DB Goblet Squat)", "10 Scapular Health exercises"],
+                workout: { type: "EMOM 12 Minutes", details: [
+                    "Minute 1: 6-8 Alternating DB Snatches (light-moderate, focus on form!)",
+                    "Minute 2: 10 Push-ups",
+                    "Minute 3: 12 Air Squats"
+                ]},
+                cooldown: ["5 min Walk", "30s Shoulder Dislocates (band or towel)", "30s Wrist Stretches", "30s Quad Stretch"]
+            },
+             {
+                day: 21, title: "Heavy Carry & Core", focus: "Grip Strength & Core Endurance",
+                warmup: ["5 min Cardio", "10 Inchworms", "10 Goblet Squats", "30s Plank"],
+                workout: { type: "3 Rounds For Time", details: ["50 ft DB Farmer's Carry (heavy)", "15 Toes-to-Bar (sub: Knee Raises or V-Ups)", "50 ft DB Farmer's Carry (heavy)", "15 DB Russian Twists (moderate)"] },
+                cooldown: ["5 min Stretching", "30s Forearm Stretch", "30s Oblique Stretch", "30s Hip Flexor Stretch"]
+            },
+            {
+                day: 22, title: "Push, Pull, Squat", focus: "Classic Strength Trio",
+                warmup: ["5 min Mobility", "10 Bootstrappers", "10 Push-ups", "10 Ring Rows (or DB Rows)"],
+                workout: { type: "5 Rounds", details: ["5 DB Push Press (moderate-heavy)", "10 DB Bent Over Rows (moderate)", "15 Air Squats", "Rest 60s between rounds"] },
+                cooldown: ["5 min Walk", "30s Shoulder Stretch", "30s Lat Stretch", "30s Quad Stretch"]
+            },
+             {
+                day: 23, title: "Interval Burn", focus: "High Intensity Intervals",
+                warmup: ["5 min Increasing Intensity Cardio", "Dynamic Stretching"],
+                workout: { type: "5 Rounds - 1 min work / 1 min rest", details: [
+                    "Round 1: Max DB Thrusters (light-moderate)",
+                    "Round 2: Max Burpees",
+                    "Round 3: Max Alternating DB Snatches (light-moderate)",
+                    "Round 4: Max Jumping Lunges",
+                    "Round 5: Max DB Swings (American or Russian)"
+                ]},
+                cooldown: ["5-10 min Easy Cardio", "Full Body Static Stretching"]
+            },
+            {
+                day: 24, title: "Upper Body Pump", focus: "Hypertrophy & Volume",
+                warmup: ["5 min Arm Circles, Shoulder Rolls", "Light Band Work", "10 DB Flyes (light)", "10 Bicep Curls (light)"],
+                workout: { type: "3 Giant Sets", details: [
+                    "10 DB Bench Press (moderate)",
+                    "12 DB Incline Press (floor variation if needed)",
+                    "15 DB Push-ups (hands on DBs)",
+                    "12 DB Bicep Curls",
+                    "15 DB Triceps Kickbacks",
+                    "Rest 90-120s between sets"
+                ]},
+                cooldown: ["5 min Stretching", "Focus on Chest, Shoulders, Biceps, Triceps"]
+            },
+            {
+                day: 25, title: "Midpoint Challenge: Benchmark Test", focus: "Performance Check",
+                warmup: ["10 min Thorough Warm-up (Cardio, Mobility, Activation for all movements)"],
+                workout: { type: "For Time ('Dumbbell Diane' variation)", details: ["21-15-9 Reps Of:", "DB Deadlifts (challenging weight, e.g., 50/35 lbs each hand if possible, adjust)", "Push-ups (strict if possible)"] },
+                cooldown: ["10 min Cool Down Walk & Stretch", "Record your time!", "Focus on Hamstrings, Chest, Shoulders"]
+            },
+            // Phase 3: Intensification & Complexity (Days 26-40) - Heavier weights, longer workouts, complex movements
+             {
+                day: 26, title: "Heavy Day: Squats", focus: "Maximal Lower Body Strength",
+                warmup: ["5 min Cardio", "Hip Mobility Drills", "Glute Activation", "Progressive Overload Warm-up sets for Front Squat"],
+                workout: { type: "Strength", details: ["DB Front Squats: Find a challenging 5 Rep Max (5RM)", "Then, 3 sets of 8 reps @ 75-80% of 5RM", "Accessory: 3x12 DB Walking Lunges (moderate)"] },
+                cooldown: ["5 min Walk", "1 min Quad Stretch (each)", "1 min Hamstring Stretch (each)", "1 min Pigeon Pose (each)"]
+            },
+             {
+                day: 27, title: "Grip & Grind", focus: "Endurance & Mental Toughness",
+                warmup: ["5 min Cardio", "Wrist/Forearm Mobility", "10 Pull-aparts", "10 Dead Hangs (if possible, otherwise Farmer's Hold simulation)"],
+                workout: { type: "AMRAP 18 Minutes", details: ["15 DB Swings (moderate)", "12 DB Hang Clean & Jerk (6 each arm, moderate)", "9 Burpees Over Dumbbell"] },
+                cooldown: ["5 min Stretching", "Forearm Stretches", "Shoulder Stretches", "Hip Flexor Stretch"]
+            },
+             {
+                day: 28, title: "Core Crusher EMOM", focus: "Midline Stability & Strength",
+                warmup: ["5 min Dynamic Core Prep", "2 Rounds: 10 Bird Dog, 10 Dead Bug, 30s Plank"],
+                workout: { type: "EMOM 15 Minutes", details: [
+                    "Minute 1: 10-12 V-Ups (or Tuck Crunches)",
+                    "Minute 2: 10-12 DB Renegade Rows (total, maintain strict plank)",
+                    "Minute 3: 30-40s Max Effort Plank Hold"
+                ]},
+                cooldown: ["5 min Gentle Stretching", "Cobra Stretch", "Child's Pose", "Supine Twist"]
+            },
+             { // Day 29 - Introduce Man Makers
+                day: 29, title: "Man Maker Mania", focus: "Full Body Strength & Coordination",
+                warmup: ["5-7 min Cardio & Mobility", "Warm-up components of Man Maker: Push-up, Row, Clean, Press (light DB)"],
+                workout: { type: "5 Rounds For Time", details: ["5 Man Makers (light-moderate, focus on smooth transitions)", "10 DB Goblet Squats (moderate)"] },
+                cooldown: ["5 min Walk", "Chest Stretch", "Lat Stretch", "Quad Stretch"]
+            },
+            {
+                day: 30, title: "Ascending Ladder", focus: "Increasing Intensity",
+                warmup: ["5 min Jump Rope / Jumping Jacks", "Dynamic Stretching", "Light reps of workout movements"],
+                workout: { type: "AMRAP 14 Minutes - Ascending Ladder", details: ["3 DB Thrusters (moderate)", "3 Burpees", "6 DB Thrusters", "6 Burpees", "9 DB Thrusters", "9 Burpees", "...continue adding 3 reps each round"] },
+                cooldown: ["5 min Cool Down", "Full Body Stretch"]
+            },
+             {
+                day: 31, title: "Heavy Rows & Presses", focus: "Upper Body Max Strength",
+                warmup: ["5 min Cardio", "Shoulder/Back Mobility", "Warm-up sets for Row & Press"],
+                workout: { type: "Strength", details: [
+                    "Single Arm DB Row: Find a challenging 5 Rep Max (5RM) each arm",
+                    "DB Strict Press (Seated or Standing): Find a challenging 5RM",
+                    "Accessory: 3x10 DB Lateral Raises, 3x10 DB Front Raises (light-moderate)"
+                ]},
+                cooldown: ["5 min Stretching", "Lat Stretch", "Shoulder Capsule Stretch", "Pec Stretch"]
+            },
+            {
+                day: 32, title: "Lunges & Snatches", focus: "Unilateral Power & Conditioning",
+                warmup: ["5 min Dynamic Warm-up", "Lunge Variations", "Light DB Snatch practice"],
+                workout: { type: "For Time", details: ["5 Rounds:", "10 Alternating DB Snatches (moderate)", "12 DB Overhead Walking Lunges (6 each leg, hold one DB overhead)", "14 Sit-ups"] },
+                cooldown: ["5 min Walk", "Hip Flexor Stretch", "Shoulder Stretch", "Hamstring Stretch"]
+            },
+            {
+                day: 33, title: "Chipper: Volume Focus", focus: "Work Capacity & Endurance",
+                warmup: ["5-7 min Cardio", "Mobility for Squats, Push, Pull"],
+                workout: { type: "For Time", details: [
+                    "50 DB Goblet Squats (light-moderate)",
+                    "40 Push-ups",
+                    "30 DB Hang Cleans (moderate)",
+                    "20 Burpees",
+                    "10 Devil Presses (moderate)"
+                ]},
+                cooldown: ["5-10 min Walk & Stretch", "Focus on recovery breathing"]
+            },
+            {
+                day: 34, title: "Strength & Stamina Intervals", focus: "Combining Heavy Lifts & Cardio",
+                warmup: ["5 min Cardio", "Dynamic Stretching", "Light reps of movements"],
+                workout: { type: "Every 4 Minutes for 20 Minutes (5 Sets)", details: [
+                    "8 DB Bench Press (heavy)",
+                    "10 DB Bent Over Rows (heavy)",
+                    "Max Burpees in remaining time"
+                ]},
+                cooldown: ["5 min Stretching", "Chest/Back Stretch", "Hip Stretch"]
+            },
+            {
+                day: 35, title: "Leg Endurance Test", focus: "Lactic Threshold & Mental Grit",
+                warmup: ["5 min Cycling/Jogging", "Leg Swings, Squats, Lunges"],
+                workout: { type: "For Time", details: [
+                    "50-40-30-20-10 Reps Of:",
+                    "Air Squats",
+                    "Alternating DB Reverse Lunges (total reps, light-moderate)"
+                ]},
+                cooldown: ["5 min Walk", "Deep Quad/Hip Flexor Stretches", "Hamstring Stretches"]
+            },
+            { // Day 36 - Complex EMOM
+                day: 36, title: "Complex Skill EMOM", focus: "Efficiency & Pacing",
+                warmup: ["5 min Mobility", "Practice DB Clean, Press, Snatch"],
+                workout: { type: "EMOM 16 Minutes", details: [
+                    "Minute 1: 6-8 DB Clean & Jerks (moderate)",
+                    "Minute 2: 8-10 Alternating DB Snatches (moderate)",
+                    "Minute 3: 10-12 DB Front Squats (moderate)",
+                    "Minute 4: Rest"
+                ]},
+                cooldown: ["5 min Stretching", "Shoulder Mobility", "Wrist Stretches"]
+            },
+            {
+                day: 37, title: "Heavy Carry Gauntlet", focus: "Grip, Core & Conditioning",
+                warmup: ["5 min Cardio", "Grip Prep", "Core Activation"],
+                workout: { type: "3 Rounds For Time", details: [
+                    "100 ft DB Farmer's Carry (heavy)",
+                    "15 V-Ups",
+                    "100 ft Single DB Overhead Carry (50ft each arm, moderate)",
+                    "15 DB Russian Twists (moderate)"
+                ]},
+                cooldown: ["5 min Stretching", "Forearm/Grip Stretch", "Oblique/Core Stretch"]
+            },
+             {
+                day: 38, title: "Push/Pull Power", focus: "Explosive Upper Body",
+                warmup: ["5 min Dynamic", "Band Pull-aparts", "Plyo Push-ups (or explosive regular push-ups)"],
+                workout: { type: "AMRAP 15 Minutes", details: [
+                    "5 DB Push Press (moderate-heavy)",
+                    "7 DB Renegade Rows (challenging weight, focus on stability)",
+                    "9 Box Jumps (or Tuck Jumps if no box)"
+                ]},
+                cooldown: ["5 min Stretching", "Shoulder/Chest Stretch", "Lat Stretch"]
+            },
+             {
+                day: 39, title: "Descending Chipper", focus: "Finishing Strong",
+                warmup: ["5-7 min Cardio & Mobility", "Light reps of movements"],
+                workout: { type: "For Time", details: [
+                    "10-9-8-7-6-5-4-3-2-1 Reps Of:",
+                    "Devil Presses (moderate)",
+                    "DB Goblet Squats (moderate)"
+                ]},
+                cooldown: ["5 min Walk & Stretch", "Full Body Recovery"]
+            },
+             {
+                day: 40, title: "Benchmark Retest: Dumbbell Fran-ish", focus: "Performance Check",
+                warmup: ["10 min Thorough Warm-up", "Focus on Thrusters & Pulling simulation"],
+                workout: { type: "For Time", details: ["21-15-9 Reps Of:", "DB Thrusters (moderate weight, e.g., 40/25 lbs each hand, adjust)", "DB Bent Over Rows (same weight as thrusters)"] },
+                cooldown: ["10 min Cool Down & Stretch", "Record Time!", "Shoulders, Legs, Back focus"]
+            },
+
+            // Phase 4: Peak Performance & Advanced Skills (Days 41-50) - Max intensity, complex workouts, challenge weights
+            {
+                day: 41, title: "Heavy Complex", focus: "Strength & Coordination Under Fatigue",
+                warmup: ["5 min Cardio", "Barbell Warmup Simulation (Clean, Press, Squat)", "Mobility"],
+                workout: { type: "Every 2 Minutes for 12 Minutes (6 Sets)", details: [
+                    "Perform the following complex without dropping DBs:",
+                    "1 DB Hang Power Clean",
+                    "1 DB Front Squat",
+                    "1 DB Push Press",
+                    "1 DB Back Squat (carefully transition DBs or use Goblet if needed)",
+                    "1 DB Push Jerk (if comfortable, otherwise Push Press)",
+                    "(Use challenging weight)"
+                ]},
+                cooldown: ["5 min Walk", "Deep Stretching", "Shoulder Mobility"]
+            },
+             {
+                day: 42, title: "Long Endurance AMRAP", focus: "Sustained Output & Pacing",
+                warmup: ["5-7 min Cardio", "Dynamic Stretching"],
+                workout: { type: "AMRAP 20 Minutes", details: [
+                    "10 DB Deadlifts (moderate)",
+                    "15 Push-ups",
+                    "20 Air Squats",
+                    "25 Sit-ups"
+                ]},
+                cooldown: ["5-10 min Cool Down Walk", "Thorough Full Body Stretch"]
+            },
+             {
+                day: 43, title: "Power Snatch & Carry", focus: "Explosiveness & Stability",
+                warmup: ["5 min Snatch Prep", "Mobility", "Core Activation"],
+                workout: { type: "4 Rounds For Time", details: [
+                    "10 Alternating DB Power Snatches (heavy but smooth)",
+                    "50 ft Single Arm DB Overhead Carry (heavy, 25ft each arm)",
+                    "10 Burpees"
+                ]},
+                cooldown: ["5 min Stretching", "Shoulder/Overhead Mobility", "Hip Flexors"]
+            },
+            {
+                day: 44, title: "The Grinder", focus: "Mental Toughness & Volume",
+                warmup: ["5 min Cardio", "Movement Prep"],
+                workout: { type: "For Time", details: [
+                    "100 DB Renegade Rows (total, light-moderate)",
+                    "100 DB Goblet Squats (light-moderate)",
+                    "100 Push-ups"
+                    ], notes:"Partition reps as needed (e.g., 10 Rounds of 10/10/10). Break before form degrades."},
+                cooldown: ["10 min Walk & Stretch", "Focus on Chest, Back, Legs, Core"]
+            },
+            {
+                day: 45, title: "Strength + Metcon", focus: "Heavy Lifting & Conditioning",
+                warmup: ["5 min Cardio", "Warm-up for Deadlift", "Dynamic Prep"],
+                workout: { type: "Strength then Metcon", details: [
+                    "Part A: DB Deadlift - Find a challenging 3 Rep Max (3RM)",
+                    "Part B: 3 Rounds For Time - 15 DB Swings (heavy), 10 Burpees Over DB"
+                ]},
+                cooldown: ["5 min Stretching", "Hamstrings, Glutes, Lower Back focus"]
+            },
+             {
+                day: 46, title: "Max Effort Intervals", focus: "Peak Power Output",
+                warmup: ["5-7 min Progressive Cardio", "Plyometrics", "Movement Prep"],
+                workout: { type: "6 Rounds: 40s Max Effort / 20s Rest", details: [
+                    "Round 1: Max Alternating DB Snatches (moderate)",
+                    "Round 2: Max Burpees",
+                    "Round 3: Max DB Thrusters (light-moderate)",
+                    "Round 4: Max Jumping Lunges",
+                    "Round 5: Max Devil Presses (light)",
+                    "Round 6: Max Air Squats"
+                ]},
+                cooldown: ["5-10 min Easy Cardio", "Deep Breathing & Stretching"]
+            },
+             {
+                day: 47, title: "Unilateral Hell", focus: "Single Limb Strength & Endurance",
+                warmup: ["5 min Mobility", "Single Leg Balance Drills"],
+                workout: { type: "For Time", details: [
+                    "50 Alternating Single Leg DB RDLs (25 each, moderate)",
+                    "40 Single Arm DB Push Press (20 each, moderate)",
+                    "30 Single Arm DB Rows (15 each, heavy)",
+                    "20 Pistols (scaled: Box Pistols or Assisted Pistols, or 40 Goblet Squats)"
+                ]},
+                cooldown: ["5 min Walk", "Deep Hip/Glute Stretches", "Shoulder/Lat Stretches"]
+            },
+            {
+                day: 48, title: "The Long Chipper", focus: "Endurance & Strategy",
+                warmup: ["10 min Comprehensive Warm-up"],
+                workout: { type: "For Time", details: [
+                    "50 Wall Balls (sub: 50 DB Thrusters, light)",
+                    "40 Calorie Row (sub: 40 Burpees or 3 min intense cardio)",
+                    "30 DB Snatches (alternating, moderate)",
+                    "20 Man Makers (light-moderate)",
+                    "10 Heavy DB Goblet Squats (as heavy as possible with good form)"
+                ]},
+                cooldown: ["10 min Cool Down Walk", "Prioritize full body stretching"]
+            },
+             {
+                day: 49, title: "Partner Style (Solo)", focus: "Pacing & Short Bursts",
+                warmup: ["5 min Cardio", "Dynamic Stretching"],
+                workout: { type: "10 Rounds For Time (You go, I go style - perform one movement, rest while 'partner' would work)", details: [
+                    "Round X (You): 5 Devil Presses (moderate)",
+                    "Round X (Partner): Rest approx same time it took",
+                    "Round Y (You): 10 DB Front Squats (moderate)",
+                    "Round Y (Partner): Rest approx same time it took"
+                    ], notes:"Alternate between Devil Press rounds and Front Squat rounds for 10 total work rounds (5 of each exercise). Rest period should roughly match your work period."},
+                cooldown: ["5 min Stretching", "Focus on recovery"]
+            },
+            {
+                day: 50, title: "Final Challenge: 'The Dumbbell Decimator'", focus: "Culmination Test",
+                warmup: ["10-15 min Very Thorough Warm-up & Mobility"],
+                workout: { type: "For Time", details: [
+                    "1000m Run (sub: 3-5 min intense cardio like high knees/burpees)",
+                    "Then, 5 Rounds Of:",
+                    "10 DB Deadlifts (heavy)",
+                    "10 DB Hang Power Cleans (moderate)",
+                    "10 DB Push Jerks (or Push Press, moderate)",
+                    "Then,",
+                    "1000m Run (sub: 3-5 min intense cardio)"
+                ]},
+                cooldown: ["15 min Cool Down: Walk, Deep Stretching, Foam Rolling (if available)", "CONGRATULATIONS!"]
+            }
+        ];
+
+        // --- APPLICATION LOGIC ---
+        const workoutDisplay = document.getElementById('workoutDisplay');
+        const prevDayButton = document.getElementById('prevDay');
+        const nextDayButton = document.getElementById('nextDay');
+        const dayIndicator = document.getElementById('dayIndicator');
+        const completeCheckbox = document.getElementById('completeCheckbox');
+        const progressBar = document.getElementById('progressBar');
+
+        // Timer Variables
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startTimerBtn = document.getElementById('startTimer');
+        const stopTimerBtn = document.getElementById('stopTimer');
+        const resetTimerBtn = document.getElementById('resetTimer');
+        let timerInterval = null;
+        let timerSeconds = 0;
+
+        let currentDayIndex = 0;
+        let completedDays = [];
+        const totalDays = workouts.length;
+
+        function loadState() {
+            const savedDayIndex = localStorage.getItem('dumbbellApp_currentDayIndex');
+            const savedCompletedDays = localStorage.getItem('dumbbellApp_completedDays');
+
+            if (savedDayIndex !== null) {
+                currentDayIndex = parseInt(savedDayIndex, 10);
+            } else {
+                currentDayIndex = 0; // Start at Day 1 (index 0)
+            }
+
+            if (savedCompletedDays !== null) {
+                completedDays = JSON.parse(savedCompletedDays);
+            } else {
+                completedDays = Array(totalDays).fill(false); // Initialize if not found
+            }
+
+             // Ensure completedDays array is the correct length if workouts array changes
+            if (completedDays.length !== totalDays) {
+                const newCompleted = Array(totalDays).fill(false);
+                // Copy over existing completions
+                for(let i = 0; i < Math.min(completedDays.length, totalDays); i++) {
+                    newCompleted[i] = completedDays[i];
+                }
+                completedDays = newCompleted;
+                saveState(); // Save the potentially corrected array
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('dumbbellApp_currentDayIndex', currentDayIndex.toString());
+            localStorage.setItem('dumbbellApp_completedDays', JSON.stringify(completedDays));
+        }
+
+        function updateProgressBar() {
+            const completedCount = completedDays.filter(Boolean).length;
+            const percentage = Math.round((completedCount / totalDays) * 100);
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = `${percentage}% Complete (${completedCount}/${totalDays})`;
+        }
+
+        function displayWorkout(index) {
+            if (index < 0 || index >= workouts.length) {
+                console.error("Invalid workout index:", index);
+                workoutDisplay.innerHTML = "<p>Workout not found.</p>";
+                return; // Exit if index is out of bounds
+            }
+            const workout = workouts[index];
+            let workoutHTML = `
+                <h2>Day ${workout.day}: ${workout.title}</h2>
+                <div class="workout-section">
+                    <h3>Focus:</h3>
+                    <p>${workout.focus}</p>
+                </div>
+                <div class="workout-section">
+                    <h3>Warm-up:</h3>
+                    <ul>${workout.warmup.map(item => `<li>${item}</li>`).join('')}</ul>
+                </div>
+                <div class="workout-section">
+                    <h3>Workout: ${workout.workout.type}</h3>
+                    <ul>${workout.workout.details.map(item => `<li>${item}</li>`).join('')}</ul>
+                    ${workout.workout.notes ? `<p><em>Note: ${workout.workout.notes}</em></p>` : ''}
+                </div>
+                 <div class="workout-section">
+                    <h3>Cooldown:</h3>
+                    <ul>${workout.cooldown.map(item => `<li>${item}</li>`).join('')}</ul>
+                </div>
+                 ${workout.notes ? `<div class="notes workout-notes"><strong>Notes for the Day:</strong><p>${workout.notes}</p></div>` : ''}
+            `;
+            workoutDisplay.innerHTML = workoutHTML;
+            dayIndicator.textContent = `Day ${workout.day} / ${totalDays}`;
+
+            // Update button states
+            prevDayButton.disabled = index === 0;
+            nextDayButton.disabled = index === totalDays - 1;
+
+            // Update checkbox state
+            completeCheckbox.checked = completedDays[index];
+
+            // Reset timer whenever workout changes
+            resetTimer();
+        }
+
+        // --- Timer Functions ---
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) return; // Already running
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                timerDisplay.textContent = formatTime(timerSeconds);
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timerSeconds = 0;
+            timerDisplay.textContent = formatTime(timerSeconds);
+        }
+
+
+        // --- Event Listeners ---
+        prevDayButton.addEventListener('click', () => {
+            if (currentDayIndex > 0) {
+                currentDayIndex--;
+                displayWorkout(currentDayIndex);
+                saveState(); // Save current day when navigating
+            }
+        });
+
+        nextDayButton.addEventListener('click', () => {
+            if (currentDayIndex < totalDays - 1) {
+                currentDayIndex++;
+                displayWorkout(currentDayIndex);
+                saveState(); // Save current day when navigating
+            }
+        });
+
+        completeCheckbox.addEventListener('change', () => {
+             if (currentDayIndex >= 0 && currentDayIndex < completedDays.length) {
+                completedDays[currentDayIndex] = completeCheckbox.checked;
+                updateProgressBar();
+                saveState(); // Save completion status
+             } else {
+                 console.error("Attempted to update completion for invalid index:", currentDayIndex);
+             }
+        });
+
+        startTimerBtn.addEventListener('click', startTimer);
+        stopTimerBtn.addEventListener('click', stopTimer);
+        resetTimerBtn.addEventListener('click', resetTimer);
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState(); // Load saved progress first
+            displayWorkout(currentDayIndex); // Display the loaded or default day
+            updateProgressBar(); // Update progress bar based on loaded state
+        });
+
+    </script>
+
+</body>
+</html>
